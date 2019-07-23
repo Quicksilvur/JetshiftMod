@@ -78,7 +78,8 @@ namespace JetshiftMod.NPCs
 					if (base.npc.frame.Y >= frameHeight * 14)
 					{
 						base.npc.frame.Y = frameHeight * 14;
-						if (earthquakeTimer++ == 0)
+						earthquakeTimer++;
+						if (earthquakeTimer == 1)
 						{
 							Main.PlaySound(SoundID.NPCDeath14, (int)base.npc.Center.X, (int)base.npc.Center.Y);
 							for (int j = 0; j < 20; j++)
@@ -92,7 +93,7 @@ namespace JetshiftMod.NPCs
 								}
 							}
 						}
-						if (earthquakeTimer++ < 60)
+						if (earthquakeTimer < 240)
 						{
 							JetshiftGlobalNPC.isQuakerQuaking = false;
 							if (JSHelper.WithinRange(earthquakeTimer, 0, 3))
@@ -113,14 +114,14 @@ namespace JetshiftMod.NPCs
 									}
 								}
 							}
-							if (Vector2.Distance(player2.Center, base.npc.Center) < 800f && c != -1)
+							if (Vector2.Distance(player2.Center, base.npc.Center) < 800f && c != -1 && JSHelper.WithinRange(earthquakeTimer, 0, 3))
 							{
 								player2.velocity.Y -= 6f;
 								player2.AddBuff(156, 180, true);
 							}
 							return;
 						}
-						earthquakeTimer = -60;
+						earthquakeTimer = -120;
 						base.npc.velocity.X = 1.54f;
 						flag2 = false;
 						return;
@@ -217,6 +218,19 @@ namespace JetshiftMod.NPCs
 		private void Talk(string Words)
 		{
 			Main.NewText(Words, 255, 200, 0, false);
+		}
+
+		public override float SpawnChance(NPCSpawnInfo spawnInfo)
+		{
+			if (spawnInfo.playerSafe || !Main.LocalPlayer.GetModPlayer<JetshiftModPlayer>(mod).ZoneGreatDarkness)
+			{
+				return 0f;
+			}
+			if (Main.LocalPlayer.GetModPlayer<JetshiftModPlayer>(mod).ZoneGreatDarkness && Main.player[Main.myPlayer].ZoneDirtLayerHeight && !NPC.AnyNPCs(base.mod.NPCType("Quaker")))
+			{
+				return 0.3f;
+			}
+			return 0f;
 		}
 
 		public override void ScaleExpertStats(int numPlayers, float bossLifeScale)
